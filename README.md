@@ -1,5 +1,5 @@
 # HDF5
-Dummy project to build 32-bit HDF5 library on drone.io
+Dummy project to build the HDF5 library on Travis CI
 
 ## Build status
-[![Build Status](https://drone.io/github.com/tbeu/hdf5/status.png)](https://drone.io/github.com/tbeu/hdf5/latest)
+[![Build Status](https://travis-ci.org/tbeu/hdf5.svg?branch=master)](https://travis-ci.org/tbeu/hdf5)
