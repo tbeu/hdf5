@@ -22,34 +22,32 @@ matrix:
     - os: linux
       compiler: gcc-4.8
       env:
-        - BUILD_LINUX32=yes
+        - PLATFORM=32
     - os: linux
       compiler: gcc-4.8
       env:
-        - BUILD_LINUX32=no
+        - PLATFORM=64
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
   - curl https://bitbucket.org/Swyter/bitbucket-curl-upload-to-repo-downloads/raw/default/upload-to-bitbucket.sh -O -J && chmod +x ./upload-to-bitbucket.sh
 
 install:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ "$CC" == "gcc-4.8" ]]; then git clone --depth 5 https://github.com/madler/zlib; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ "$CC" == "gcc-4.8" ]]; then cd zlib; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ "$CC" == "gcc-4.8" ]] && [[ "$BUILD_LINUX32" == "yes" ]]; then CFLAGS="-w -msse2 -m32" LDFLAGS="-m32" ./configure --prefix=$TRAVIS_BUILD_DIR/zlib --eprefix=$TRAVIS_BUILD_DIR/zlib; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ "$CC" == "gcc-4.8" ]] && [[ "$BUILD_LINUX32" == "no" ]]; then ./configure --prefix=$TRAVIS_BUILD_DIR/zlib --eprefix=$TRAVIS_BUILD_DIR/zlib; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ "$CC" == "gcc-4.8" ]]; then make install; fi
+  - git clone --depth 5 https://github.com/madler/zlib
+  - cd zlib
+  - if [[ "$PLATFORM" == "32" ]]; then CFLAGS="-w -msse2 -m32" LDFLAGS="-m32" ./configure --prefix=$TRAVIS_BUILD_DIR/zlib --eprefix=$TRAVIS_BUILD_DIR/zlib; fi
+  - if [[ "$PLATFORM" == "64" ]]; then ./configure --prefix=$TRAVIS_BUILD_DIR/zlib --eprefix=$TRAVIS_BUILD_DIR/zlib; fi
+  - make install
   - cd $TRAVIS_BUILD_DIR
 
 script:
   - git clone --branch hdf5_1_8_18 https://bitbucket.hdfgroup.org/scm/hdffv/hdf5.git hdf5_1_8_18
   - cd hdf5_1_8_18
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ "$CC" == "gcc-4.8" ]] && [[ "$BUILD_LINUX32" == "yes" ]]; then ./configure --quiet --enable-shared --enable-production=yes --enable-debug=no --disable-deprecated-symbols --disable-hl --with-pic --with-default-api-version=v18 --with-zlib=$TRAVIS_BUILD_DIR/zlib --build=i686-pc-linux-gnu CFLAGS="-w -msse2 -m32" LDFLAGS="-m32"; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ "$CC" == "gcc-4.8" ]] && [[ "$BUILD_LINUX32" == "no" ]]; then ./configure --quiet --enable-shared --enable-production=yes --enable-debug=no --disable-deprecated-symbols --disable-hl --with-pic --with-default-api-version=v18 --with-zlib=$TRAVIS_BUILD_DIR/zlib CFLAGS="-w"; fi
+  - if [[ "$PLATFORM" == "32" ]]; then ./configure --quiet --enable-shared --enable-production=yes --enable-debug=no --disable-deprecated-symbols --disable-hl --with-pic --with-default-api-version=v18 --with-zlib=$TRAVIS_BUILD_DIR/zlib --build=i686-pc-linux-gnu CFLAGS="-w -msse2 -m32" LDFLAGS="-m32"; fi
+  - if [[ "$PLATFORM" == "64" ]]; then ./configure --quiet --enable-shared --enable-production=yes --enable-debug=no --disable-deprecated-symbols --disable-hl --with-pic --with-default-api-version=v18 --with-zlib=$TRAVIS_BUILD_DIR/zlib CFLAGS="-w"; fi
   - make install -C src
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ "$CC" == "gcc-4.8" ]] && [[ "$BUILD_LINUX32" == "yes" ]]; then tar cJf hdf5-1.8.18_linux32.tar.xz hdf5/include/* hdf5/lib/* src/H5lib_settings.c src/H5Tinit.c src/H5config.h; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ "$CC" == "gcc-4.8" ]] && [[ "$BUILD_LINUX32" == "no" ]]; then tar cJf hdf5-1.8.18_linux64.tar.xz hdf5/include/* hdf5/lib/* src/H5lib_settings.c src/H5Tinit.c src/H5config.h; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ "$CC" == "gcc-4.8" ]] && [[ "$BUILD_LINUX32" == "yes" ]]; then sh ../upload-to-bitbucket.sh tbeu $BBPASS /tbeu/downloads/downloads hdf5-1.8.18_linux32.tar.xz; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ "$CC" == "gcc-4.8" ]] && [[ "$BUILD_LINUX32" == "no" ]]; then sh ../upload-to-bitbucket.sh tbeu $BBPASS /tbeu/downloads/downloads hdf5-1.8.18_linux64.tar.xz; fi
+  - tar cJf hdf5-1.8.18_linux$PLATFORM.tar.xz hdf5/include/* hdf5/lib/* src/H5lib_settings.c src/H5Tinit.c src/H5config.h
+  - sh ../upload-to-bitbucket.sh tbeu $BBPASS /tbeu/downloads/downloads hdf5-1.8.18_linux$PLATFORM.tar.xz
 
 notifications:
   email: false
