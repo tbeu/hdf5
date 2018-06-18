@@ -41,13 +41,13 @@ install:
   - cd $TRAVIS_BUILD_DIR
 
 script:
-  - git clone --depth 5 --branch hdf5_1_8_20 https://git.hdfgroup.org/scm/hdffv/hdf5.git hdf5_1_8_20
-  - cd hdf5_1_8_20
+  - git clone --depth 5 --branch hdf5_1_8_21 https://git.hdfgroup.org/scm/hdffv/hdf5.git hdf5_1_8_21
+  - cd hdf5_1_8_21
   - if [[ "$PLATFORM" == "32" ]]; then ./configure --quiet --enable-shared --enable-production=yes --enable-debug=no --disable-deprecated-symbols --disable-hl --with-pic --with-default-api-version=v18 --with-zlib=$TRAVIS_BUILD_DIR/zlib --build=i686-pc-linux-gnu CFLAGS="-w -msse2 -m32" LDFLAGS="-m32"; fi
   - if [[ "$PLATFORM" == "64" ]]; then ./configure --quiet --enable-shared --enable-production=yes --enable-debug=no --disable-deprecated-symbols --disable-hl --with-pic --with-default-api-version=v18 --with-zlib=$TRAVIS_BUILD_DIR/zlib CFLAGS="-w"; fi
   - make install -C src
-  - tar cJf hdf5-1.8.20_linux$PLATFORM.tar.xz hdf5/include/* hdf5/lib/* src/H5lib_settings.c src/H5Tinit.c src/H5config.h
-  - sh ../upload-to-bitbucket.sh tbeu $BBPASS /tbeu/downloads/downloads hdf5-1.8.20_linux$PLATFORM.tar.xz
+  - tar cJf hdf5-1.8.21_linux$PLATFORM.tar.xz hdf5/include/* hdf5/lib/* src/H5lib_settings.c src/H5Tinit.c src/H5config.h
+  - sh ../upload-to-bitbucket.sh tbeu $BBPASS /tbeu/downloads/downloads hdf5-1.8.21_linux$PLATFORM.tar.xz
 
 notifications:
   email: false
